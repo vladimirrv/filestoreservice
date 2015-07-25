@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:apachesoap="http://xml.apache.org/xml-soap"
+	xmlns:impl="http://storeservice.foo.com" xmlns:intf="http://storeservice.foo.com"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://storeservice.foo.com">
+	<wsdl:types>
+		<schema xmlns="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" targetNamespace="http://storeservice.foo.com">
+			<element name="storeMessage">
+				<complexType>
+					<sequence>
+						<element name="name" type="xsd:string" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="storeMessageResponse">
+				<complexType>
+					<sequence>
+						<element name="storeMessageReturn" type="xsd:string" />
+					</sequence>
+				</complexType>
+			</element>
+		</schema>
+	</wsdl:types>
+
+	<wsdl:message name="storeMessageResponse">
+
+		<wsdl:part element="impl:storeMessageResponse" name="parameters">
+
+		</wsdl:part>
+
+	</wsdl:message>
+
+	<wsdl:message name="storeMessageRequest">
+
+		<wsdl:part element="impl:storeMessage" name="parameters">
+
+		</wsdl:part>
+
+	</wsdl:message>
+
+	<wsdl:portType name="StoreService">
+
+		<wsdl:operation name="storeMessage">
+
+			<wsdl:input message="impl:storeMessageRequest" name="storeMessageRequest">
+
+			</wsdl:input>
+
+			<wsdl:output message="impl:storeMessageResponse" name="storeMessageResponse">
+
+			</wsdl:output>
+
+		</wsdl:operation>
+
+	</wsdl:portType>
+
+	<wsdl:binding name="StoreServiceSoapBinding" type="impl:StoreService">
+
+		<wsdlsoap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+
+		<wsdl:operation name="storeMessage">
+
+			<wsdlsoap:operation soapAction="" />
+
+			<wsdl:input name="storeMessageRequest">
+
+				<wsdlsoap:body use="literal" />
+
+			</wsdl:input>
+
+			<wsdl:output name="storeMessageResponse">
+
+				<wsdlsoap:body use="literal" />
+
+			</wsdl:output>
+
+		</wsdl:operation>
+
+	</wsdl:binding>
+
+	<wsdl:service name="StoreServiceService">
+
+		<wsdl:port binding="impl:StoreServiceSoapBinding" name="StoreService">
+
+			<wsdlsoap:address
+				location="http://localhost:8080/services/StoreService" />
+
+		</wsdl:port>
+
+	</wsdl:service>
+
+</wsdl:definitions>
+

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:camel-cxf="http://camel.apache.org/schema/cxf"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+    http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+    http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-extension-camel.xml" />
+
+	<!-- jaxws:client id="serviceProxy1" address="http://localhost:8080/services/StoreService/" 
+		serviceClass="com.foo.storeservice.StoreService" /-->
+
+	<camel-cxf:cxfEndpoint id="serviceProxy"
+		address="http://localhost:8080/services/StoreService" serviceClass="com.foo.storeservice.StoreService"
+		wsdlURL="src/main/resources/storeservice/storeservice.wsdl"
+		endpointName="s:StoreService" serviceName="s:StoreServiceService"
+		xmlns:s="http://storeservice.foo.com">
+		<camel-cxf:properties>
+			<entry key="dataFormat" value="MESSAGE" />
+			<entry key="defaultOperationName" value="storeMessage" />
+			<entry key="wrapped" value="true" />
+			<entry key="loggingFeatureEnabled" value="true" />
+		</camel-cxf:properties>
+	</camel-cxf:cxfEndpoint>
+
+	<camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="jms:test.incoming.queue" />
+			<setBody>
+				<simple>${in.body}</simple>
+			</setBody>
+
+			<!--process ref="senderProcessor" / -->
+			<to uri="cxf:bean:serviceProxy" />
+		</route>
+	</camelContext>
+
+	<bean id="jms" class="org.apache.camel.component.jms.JmsComponent">
+		<property name="connectionFactory" ref="connectionFactory" />
+	</bean>
+
+	<bean id="connectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+		<property name="userName" value="tadmin" />
+		<property name="password" value="tadmin" />
+	</bean>
+
+	<bean id="senderProcessor" class="com.foo.storeservice.processor.SenderProcessor">
+		<property name="serviceClient" ref="serviceProxy" />
+	</bean>
+</beans>

@@ -11,9 +11,6 @@
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-extension-camel.xml" />
 
-	<!-- jaxws:client id="serviceProxy1" address="http://localhost:8080/services/StoreService/" 
-		serviceClass="com.foo.storeservice.StoreService" / -->
-
 	<camel-cxf:cxfEndpoint id="serviceProxy"
 		address="http://localhost:8080/services/StoreService" serviceClass="com.foo.storeservice.StoreService"
 		wsdlURL="src/main/resources/storeservice/storeservice.wsdl"
@@ -25,6 +22,7 @@
 		</camel-cxf:properties>
 	</camel-cxf:cxfEndpoint>
 
+    <!--Message generator which is generating messages every 20 seconds to incoming queue -->
 	<camelContext id="messageGeneratorContext" xmlns="http://camel.apache.org/schema/spring">
 		<route>
 			<from uri="timer://foo?fixedRate=true&amp;period=20s" />
@@ -38,6 +36,8 @@
 		</route>
 	</camelContext>
 
+    <!--Getting messages from incoming queue and filtering for headed Myaction and specific body-->
+    <!--sending those messages to web service endpoint-->
 	<camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
 		<route>
 			<from uri="jms:test.incoming.queue" />

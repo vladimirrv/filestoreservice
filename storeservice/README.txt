@@ -34,6 +34,7 @@ Alternatively, you can start a broker as standalone application or using contain
   * From the command line, run:
 > cd war ; mvn jetty:run
 
+
 4) Running the Client
 -------------------------------------------------------------------------------
 

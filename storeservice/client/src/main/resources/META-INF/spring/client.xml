@@ -12,7 +12,7 @@
 	<import resource="classpath:META-INF/cxf/cxf-extension-camel.xml" />
 
 	<!-- jaxws:client id="serviceProxy1" address="http://localhost:8080/services/StoreService/" 
-		serviceClass="com.foo.storeservice.StoreService" /-->
+		serviceClass="com.foo.storeservice.StoreService" / -->
 
 	<camel-cxf:cxfEndpoint id="serviceProxy"
 		address="http://localhost:8080/services/StoreService" serviceClass="com.foo.storeservice.StoreService"
@@ -20,22 +20,36 @@
 		endpointName="s:StoreService" serviceName="s:StoreServiceService"
 		xmlns:s="http://storeservice.foo.com">
 		<camel-cxf:properties>
-			<entry key="dataFormat" value="MESSAGE" />
 			<entry key="defaultOperationName" value="storeMessage" />
-			<entry key="wrapped" value="true" />
 			<entry key="loggingFeatureEnabled" value="true" />
 		</camel-cxf:properties>
 	</camel-cxf:cxfEndpoint>
 
+	<camelContext id="messageGeneratorContext" xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://foo?fixedRate=true&amp;period=20s" />
+			<setBody>
+				<constant>MyBody</constant>
+			</setBody>
+			<setHeader headerName="MyAction">
+				<simple>action</simple>
+			</setHeader>
+			<to uri="jms:test.incoming.queue" />
+		</route>
+	</camelContext>
+
 	<camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
 		<route>
 			<from uri="jms:test.incoming.queue" />
-			<setBody>
-				<simple>${in.body}</simple>
-			</setBody>
-
-			<!--process ref="senderProcessor" / -->
-			<to uri="cxf:bean:serviceProxy" />
+			<filter>
+				<simple>
+					${in.header[MyAction]} == 'action'
+				</simple>
+				<filter>
+					<simple>${in.body} == 'MyBody'</simple>
+					<to uri="cxf:bean:serviceProxy" />
+				</filter>
+			</filter>
 		</route>
 	</camelContext>
 
@@ -48,7 +62,7 @@
 		<property name="password" value="tadmin" />
 	</bean>
 
-	<bean id="senderProcessor" class="com.foo.storeservice.processor.SenderProcessor">
+	<bean id="messageGenerator" class="com.foo.storeservice.processor.SenderProcessor">
 		<property name="serviceClient" ref="serviceProxy" />
 	</bean>
 </beans>

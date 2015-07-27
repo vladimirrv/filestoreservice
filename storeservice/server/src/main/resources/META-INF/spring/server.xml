@@ -12,19 +12,28 @@
 	<import resource="classpath:META-INF/cxf/camel/cxf-extension-camel.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
+	<bean id="loggingOutInterceptor" class="org.apache.cxf.interceptor.LoggingOutInterceptor">
+	</bean>
+	<bean id="loggingInInterceptor"
+		class="com.foo.storeservice.server.interceptor.MessageInInterceptor">
+	</bean>
 
 	<camel-cxf:cxfEndpoint id="routerEndpoint"
 		address="http://localhost:8080/services/StoreService" serviceClass="com.foo.storeservice.server.StoreServiceImpl"
 		wsdlURL="src/main/resources/storeservice/storeservice.wsdl"
 		endpointName="s:StoreService" serviceName="s:StoreServiceService"
 		xmlns:s="http://storeservice.foo.com">
+		<camel-cxf:outInterceptors>
+			<ref bean="loggingOutInterceptor" />
+		</camel-cxf:outInterceptors>
+		<camel-cxf:inInterceptors>
+			<ref bean="loggingInInterceptor" />
+		</camel-cxf:inInterceptors>
 	</camel-cxf:cxfEndpoint>
 
 	<camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
 		<route>
 			<from uri="cxf:bean:routerEndpoint" />
-			<!-- process ref="serverProcessor" / -->
-			<!-- filter> <simple>${in.header[MyAction]} == 'action'</simple> </filter -->
 			<to uri="file://inbox" />
 		</route>
 
